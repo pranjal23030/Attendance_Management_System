@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.models.Attendance;
 import org.example.models.Classes;
 import org.example.models.User;
 
@@ -73,38 +74,75 @@ public class DBUtils {
         }
     }
 
-    public static List<Classes> getClasses(Connection connection, String name) {
-        String query = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_CLASSNAME + " LIKE '%" + name + "%'";
-        List<Classes> classess = new ArrayList<>();
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-
-            while (resultSet.next()){
-                int id = resultSet.getInt(COLUMN_ID);
-                String classname = resultSet.getString(COLUMN_CLASSNAME);
-
-                Classes classes = new Classes(classname);
-                classess.add(classes);
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return classess;
-    }
-
-    public static void addClass (Classes modelClass, Connection connection){
-        String sql = "INSERT INTO " + TABLE_CLASS + "(" + COLUMN_CLASSNAME + ") " + "VALUES(?)";
-
+    public static void addAttendance(Attendance modelAttendance, Connection connection){
+        String sql = "INSERT INTO " + TABLE_ATTENDANCE + "(" + COLUMN_CLASSID + "," + COLUMN_USERID +") " + "VALUES(?,?)";
         try {
             PreparedStatement pstmt = connection.prepareStatement(sql);
-            pstmt.setString(1, modelClass.getClassname());
+            pstmt.setInt(1,modelAttendance.getClassId());
+            pstmt.setInt(2,modelAttendance.getUserId());
             pstmt.executeUpdate();
-
             pstmt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public static List<Attendance> getAttendance(Connection connection, Integer id) {
+        String query = "SELECT * FROM " + TABLE_ATTENDANCE + " WHERE " + COLUMN_ID + " = " + id;
+        List<Attendance> attendances = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()){
+                int ids = resultSet.getInt(COLUMN_ID);
+                int classID = resultSet.getInt(COLUMN_CLASSID);
+                int userId = resultSet.getInt(COLUMN_USERID);
+
+                Attendance attendance = new Attendance(classID,userId);
+                attendances.add(attendance);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return attendances;
+    }
+
+
+    public static void addClass(Classes modelClass, Connection connection) {
+        String sql = "INSERT INTO " + TABLE_CLASS + "(" + COLUMN_CLASSNAME + ") "  + "VALUES(?)";
+        try {
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setString(1, modelClass.getClassname());
+            pstmt.executeUpdate();
+            pstmt.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<Classes> getClasses(Connection connection, String name) {
+        String query = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_CLASSNAME + " = " + name;
+        List<Classes> classesArrayList = new ArrayList<>();
+        try {
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, name);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt(COLUMN_ID);
+                String classname = resultSet.getString(COLUMN_CLASSNAME);
+                Classes classes1 = new Classes(classname);
+                classesArrayList.add(classes1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return classesArrayList;
+    }
+
+
+
+
 
 }

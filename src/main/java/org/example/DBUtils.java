@@ -110,12 +110,16 @@ public class DBUtils {
 
 
     public static void addClass(Classes modelClass, Connection connection) {
-        String sql = "INSERT INTO " + TABLE_CLASS + "(" + COLUMN_CLASSNAME + ") "  + "VALUES(?)";
+
+        String sql = "INSERT INTO " + TABLE_CLASS + "(" + COLUMN_CLASSNAME + ") " +
+                "VALUES(?)";
+
         try {
             PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, modelClass.getClassname());
             pstmt.executeUpdate();
             pstmt.close();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -125,24 +129,20 @@ public class DBUtils {
         String query = "SELECT * FROM " + TABLE_CLASS + " WHERE " + COLUMN_CLASSNAME + " = " + name;
         List<Classes> classesArrayList = new ArrayList<>();
         try {
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, name);
-            ResultSet resultSet = statement.executeQuery();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
 
             while (resultSet.next()) {
                 int id = resultSet.getInt(COLUMN_ID);
                 String classname = resultSet.getString(COLUMN_CLASSNAME);
-                Classes classes1 = new Classes(classname);
-                classesArrayList.add(classes1);
+
+                Classes classes = new Classes(classname);
+                classesArrayList.add(classes);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return classesArrayList;
     }
-
-
-
-
 
 }
